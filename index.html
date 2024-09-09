@@ -47,23 +47,23 @@
         #restartBtn:disabled {
             background-color: #6c757d;
         }
-        /* Mobile controls styling */
         .mobile-controls {
             position: fixed;
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 10px;
+            gap: 20px;
+            display: none; /* Hide controls by default */
         }
         .mobile-btn {
-            width: 60px;
-            height: 60px;
-            font-size: 20px;
+            width: 80px;
+            height: 80px;
+            font-size: 30px;
             color: #ffffff;
             background-color: #007bff;
             border: none;
-            border-radius: 30px;
+            border-radius: 40px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -105,6 +105,7 @@
         let score = 0;
         let itemSpeed = 5;
         let isGameOver = false;
+        let moveInterval = null; // Interval for continuous movement
 
         function drawBasket() {
             ctx.fillStyle = 'green';
@@ -162,15 +163,19 @@
             items.push({ x, y: -itemSize });
         }
 
-        function moveBasket(event) {
-            switch (event.key) {
-                case 'ArrowLeft':
+        function startMoving(direction) {
+            moveInterval = setInterval(() => {
+                if (direction === 'left') {
                     basketX = Math.max(0, basketX - 20);
-                    break;
-                case 'ArrowRight':
+                } else if (direction === 'right') {
                     basketX = Math.min(canvas.width - basketWidth, basketX + 20);
-                    break;
-            }
+                }
+            }, 50); // Move every 50ms
+        }
+
+        function stopMoving() {
+            clearInterval(moveInterval);
+            moveInterval = null;
         }
 
         function updateSpeed() {
@@ -187,20 +192,53 @@
             draw();
         }
 
-        function moveLeft() {
-            basketX = Math.max(0, basketX - 20);
+        function handleTouchStart(event) {
+            event.preventDefault(); // Prevent scrolling
+            if (event.touches[0].clientX < window.innerWidth / 2) {
+                startMoving('left');
+            } else {
+                startMoving('right');
+            }
         }
 
-        function moveRight() {
-            basketX = Math.min(canvas.width - basketWidth, basketX + 20);
+        function handleTouchEnd(event) {
+            stopMoving();
+        }
+
+        function detectDevice() {
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                document.querySelector('.mobile-controls').style.display = 'flex';
+                document.addEventListener('touchstart', handleTouchStart);
+                document.addEventListener('touchend', handleTouchEnd);
+                document.addEventListener('touchcancel', handleTouchEnd);
+            }
+        }
+
+        function moveBasket(event) {
+            switch (event.key) {
+                case 'ArrowLeft':
+                    basketX = Math.max(0, basketX - 20);
+                    break;
+                case 'ArrowRight':
+                    basketX = Math.min(canvas.width - basketWidth, basketX + 20);
+                    break;
+            }
         }
 
         document.addEventListener('keydown', moveBasket);
         speedControl.addEventListener('input', updateSpeed);
         restartBtn.addEventListener('click', restartGame);
-        leftBtn.addEventListener('click', moveLeft);
-        rightBtn.addEventListener('click', moveRight);
+
+        leftBtn.addEventListener('touchstart', () => startMoving('left'));
+        leftBtn.addEventListener('touchend', stopMoving);
+        leftBtn.addEventListener('touchcancel', stopMoving);
+
+        rightBtn.addEventListener('touchstart', () => startMoving('right'));
+        rightBtn.addEventListener('touchend', stopMoving);
+        rightBtn.addEventListener('touchcancel', stopMoving);
+
         setInterval(createItem, 1000);
+        detectDevice(); // Detect device and show/hide controls
         draw();
     </script>
 </body>
