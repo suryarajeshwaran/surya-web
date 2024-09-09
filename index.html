@@ -18,19 +18,18 @@
             background-color: #ffffff;
             border: 1px solid #000000;
         }
-        #score {
+        #score, #lives {
             position: fixed;
-            top: 10px;
-            left: 10px;
             font-size: 24px;
             color: #000000;
         }
+        #score {
+            top: 10px;
+            left: 10px;
+        }
         #lives {
-            position: fixed;
             top: 10px;
             right: 10px;
-            font-size: 24px;
-            color: #000000;
         }
         #controls {
             position: fixed;
@@ -115,7 +114,8 @@
         let itemSpeed = 5;
         let isGameOver = false;
         let lives = 3;
-        let moveInterval = null; // Interval for continuous movement
+        let moveDirection = null;
+        let moveInterval = null;
 
         function drawBasket() {
             ctx.fillStyle = 'green';
@@ -182,10 +182,11 @@
         }
 
         function startMoving(direction) {
+            moveDirection = direction;
             moveInterval = setInterval(() => {
-                if (direction === 'left') {
+                if (moveDirection === 'left') {
                     basketX = Math.max(0, basketX - 20);
-                } else if (direction === 'right') {
+                } else if (moveDirection === 'right') {
                     basketX = Math.min(canvas.width - basketWidth, basketX + 20);
                 }
             }, 50); // Move every 50ms
@@ -194,6 +195,7 @@
         function stopMoving() {
             clearInterval(moveInterval);
             moveInterval = null;
+            moveDirection = null;
         }
 
         function updateSpeed() {
@@ -210,6 +212,20 @@
             updateLives(); // Update lives display
             restartBtn.disabled = true; // Disable restart button
             draw();
+        }
+
+        function handleKeyboardMovement(event) {
+            if (event.key === 'ArrowLeft') {
+                startMoving('left');
+            } else if (event.key === 'ArrowRight') {
+                startMoving('right');
+            }
+        }
+
+        function handleKeyboardStop(event) {
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                stopMoving();
+            }
         }
 
         function handleTouchStart(event) {
@@ -231,17 +247,8 @@
                 document.addEventListener('touchstart', handleTouchStart);
                 document.addEventListener('touchend', handleTouchEnd);
                 document.addEventListener('touchcancel', handleTouchEnd);
-            }
-        }
-
-        function moveBasket(event) {
-            switch (event.key) {
-                case 'ArrowLeft':
-                    basketX = Math.max(0, basketX - 20);
-                    break;
-                case 'ArrowRight':
-                    basketX = Math.min(canvas.width - basketWidth, basketX + 20);
-                    break;
+            } else {
+                document.querySelector('.mobile-controls').style.display = 'none';
             }
         }
 
@@ -255,7 +262,8 @@
         rightBtn.addEventListener('touchcancel', stopMoving);
 
         // Event listeners for keyboard
-        document.addEventListener('keydown', moveBasket);
+        document.addEventListener('keydown', handleKeyboardMovement);
+        document.addEventListener('keyup', handleKeyboardStop);
 
         // Event listeners for controls and restart
         speedControl.addEventListener('input', updateSpeed);
