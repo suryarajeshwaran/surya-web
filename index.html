@@ -25,6 +25,13 @@
             font-size: 24px;
             color: #000000;
         }
+        #lives {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: #000000;
+        }
         #controls {
             position: fixed;
             top: 50px;
@@ -76,6 +83,7 @@
 </head>
 <body>
     <div id="score">Score: 0</div>
+    <div id="lives">Lives: 3</div>
     <div id="controls">
         Speed: <input type="range" id="speedControl" min="1" max="10" value="5">
         <span id="speedLabel">5</span>
@@ -90,6 +98,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
+        const livesElement = document.getElementById('lives');
         const speedControl = document.getElementById('speedControl');
         const speedLabel = document.getElementById('speedLabel');
         const restartBtn = document.getElementById('restartBtn');
@@ -105,6 +114,7 @@
         let score = 0;
         let itemSpeed = 5;
         let isGameOver = false;
+        let lives = 3;
         let moveInterval = null; // Interval for continuous movement
 
         function drawBasket() {
@@ -130,7 +140,11 @@
                         score++;
                         updateScore();
                     } else {
-                        isGameOver = true;
+                        lives--;
+                        updateLives();
+                        if (lives <= 0) {
+                            isGameOver = true;
+                        }
                     }
                 }
             });
@@ -139,6 +153,10 @@
 
         function updateScore() {
             scoreElement.textContent = 'Score: ' + score;
+        }
+
+        function updateLives() {
+            livesElement.textContent = 'Lives: ' + lives;
         }
 
         function draw() {
@@ -187,7 +205,9 @@
             basketX = canvas.width / 2 - basketWidth / 2;
             items = [];
             score = 0;
+            lives = 3;
             isGameOver = false;
+            updateLives(); // Update lives display
             restartBtn.disabled = true; // Disable restart button
             draw();
         }
@@ -225,10 +245,7 @@
             }
         }
 
-        document.addEventListener('keydown', moveBasket);
-        speedControl.addEventListener('input', updateSpeed);
-        restartBtn.addEventListener('click', restartGame);
-
+        // Event listeners for mobile buttons
         leftBtn.addEventListener('touchstart', () => startMoving('left'));
         leftBtn.addEventListener('touchend', stopMoving);
         leftBtn.addEventListener('touchcancel', stopMoving);
@@ -237,6 +254,14 @@
         rightBtn.addEventListener('touchend', stopMoving);
         rightBtn.addEventListener('touchcancel', stopMoving);
 
+        // Event listeners for keyboard
+        document.addEventListener('keydown', moveBasket);
+
+        // Event listeners for controls and restart
+        speedControl.addEventListener('input', updateSpeed);
+        restartBtn.addEventListener('click', restartGame);
+
+        // Initialize the game
         setInterval(createItem, 1000);
         detectDevice(); // Detect device and show/hide controls
         draw();
