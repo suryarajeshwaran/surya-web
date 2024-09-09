@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>surya game</title>
+    <title>Surya Game</title>
     <style>
         body {
             margin: 0;
@@ -47,6 +47,31 @@
         #restartBtn:disabled {
             background-color: #6c757d;
         }
+        /* Mobile controls styling */
+        .mobile-controls {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        .mobile-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mobile-btn:active {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -56,6 +81,10 @@
         <span id="speedLabel">5</span>
     </div>
     <button id="restartBtn">Restart</button>
+    <div class="mobile-controls">
+        <button id="leftBtn" class="mobile-btn">←</button>
+        <button id="rightBtn" class="mobile-btn">→</button>
+    </div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -64,6 +93,8 @@
         const speedControl = document.getElementById('speedControl');
         const speedLabel = document.getElementById('speedLabel');
         const restartBtn = document.getElementById('restartBtn');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
 
         const basketWidth = 100;
         const basketHeight = 20;
@@ -156,9 +187,19 @@
             draw();
         }
 
+        function moveLeft() {
+            basketX = Math.max(0, basketX - 20);
+        }
+
+        function moveRight() {
+            basketX = Math.min(canvas.width - basketWidth, basketX + 20);
+        }
+
         document.addEventListener('keydown', moveBasket);
         speedControl.addEventListener('input', updateSpeed);
         restartBtn.addEventListener('click', restartGame);
+        leftBtn.addEventListener('click', moveLeft);
+        rightBtn.addEventListener('click', moveRight);
         setInterval(createItem, 1000);
         draw();
     </script>
